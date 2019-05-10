@@ -31,6 +31,8 @@ N, D_in, H, D_out = 64, 1000, 100, 10
 x = torch.randn(N, D_in)
 y = torch.randn(N, D_out)
 
+import torch.nn
+
 # Construct our model by instantiating the class defined above
 model = BracketNet(D_in, H, D_out)
 

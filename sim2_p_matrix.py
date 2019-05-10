@@ -1,4 +1,9 @@
 import numpy as np
+import os
+import sys
+os.chdir("/Users/jonahadler/Desktop/code/")
+sys.path.insert(0, "/Users/jonahadler/Desktop/code/")
+
 from jonahs_things import *
 import pandas as pd
 from dfply import *
@@ -54,6 +59,26 @@ q_matrix = (silver_preds.filter(regex="win")
 )
 q_matrix = q_matrix.values
 
+def get_q():
+    return q_matrix
+
+
+def get_round_prob(q):
+    round_prob = q
+    q_exact = q
+    for col in range(1, 6):
+        round_prob[:, col] = q_exact[:, col]/q_exact[:, col-1]
+    return round_prob
+
+
+def win_prob(team1_idx, team2_idx, col, round_prob):
+    return round_prob[team1_idx, col] / round_prob[team2_idx, col]
+
+
+get_round_prob(q_matrix)
+
+
+
 def derive_p_matrix(q_matrix):
     p_matrix = np.zeros((64,64))
     np.fill_diagonal(p_matrix,np.nan)
@@ -103,6 +128,9 @@ def derive_p_matrix(q_matrix):
             #now add the normalizing constraints (min abs deviance from overall for each team)
             avgs = q_matrix[blk_start:blk_start+combs,rd] / q_matrix[blk_start:blk_start+combs,rd-1]
 
+            #works???!
+            avgs = np.nan_to_num(avgs)
+
             left = np.repeat(np.identity(combs),4,axis=0)*np.tile([1,-1,-1,1],(combs))[:,np.newaxis]
             middle =  np.repeat(np.identity(combs*2),2,axis=0)*-1
             co_new= np.concatenate([left,middle],axis=1)
@@ -124,12 +152,13 @@ def derive_p_matrix(q_matrix):
             co_matrix2 = np.concatenate([co_matrix[:-1,:],np.zeros((co_matrix[:-1,:].shape[0],combs*2))],axis=1)
             dep2=dep[:-1]
             A_wide = np.concatenate([A,np.zeros((A.shape[0],combs*2))],axis=1)
+
             A_2 = np.concatenate([A_wide,co_new])
             b_2 = np.concatenate([b,right])
 
             A_2.shape
             b_2.shape
-
+            
             co_matrix2.shape
             dep2.shape
 
@@ -143,7 +172,13 @@ def derive_p_matrix(q_matrix):
                 p_matrix[second_team,first_team] = 1-p_out[i]
     return p_matrix
 
+if __name__ == "__main__":
+    #derive_p_matrix(q_matrix)
+    b = np.loadtxt('test1.txt', dtype=int)
 
+    derive_p_matrix(b)
+
+'''
 silver_p = pd.DataFrame(derive_p_matrix(q_matrix))
 silver_p.to_csv(lake+"madness_538_p.csv",index=False)
 
@@ -187,3 +222,4 @@ silver_join.messy_team = silver_join.messy_team.map(lambda x: difflib.get_close_
 popular_matrix = pd.DataFrame(derive_p_matrix(q_matrix))
 popular_matrix.to_csv(lake+"madness_popular.csv")
 popular_matrix["name"] = silver_preds.reset_index().team_name
+'''
