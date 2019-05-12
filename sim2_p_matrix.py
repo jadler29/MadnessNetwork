@@ -3,7 +3,7 @@ import os
 import sys
 os.chdir("/Users/jonahadler/Desktop/code/")
 sys.path.insert(0, "/Users/jonahadler/Desktop/code/")
-
+import math
 from jonahs_things import *
 import pandas as pd
 from dfply import *
@@ -72,12 +72,44 @@ def get_round_prob(q):
 
 
 def win_prob(team1_idx, team2_idx, col, round_prob):
-    return round_prob[team1_idx, col] / round_prob[team2_idx, col]
+    rel_score = sum(round_prob[team1_idx, :(col+1)]) / sum(round_prob[team2_idx, :(col+1)])
+    return rel_score/(1+rel_score)
+
+def derive_p_v2(q_matrix):
+    p_matrix = np.zeros((64, 64))
+    np.fill_diagonal(p_matrix,np.nan)
+    round_prob = get_round_prob(q_matrix)
+    zone_matrix = get_zone_matrix(q_matrix)
+    for team1_idx in range(64):
+        for team2_idx in range(64):
+            if team1_idx == team2_idx:
+                continue            
+            col = round_meet(team1_idx,team2_idx,zone_matrix)
+            p_matrix[team1_idx,team2_idx] = win_prob(team1_idx,team2_idx,col, round_prob)
+    return p_matrix
+def round_meet(team1_idx,team2_idx, zone_matrix):
+    "what round will two teams meet?"
+    return np.argmax(zone_matrix[team1_idx,:] ==zone_matrix[team2_idx,:])
+    
 
 
-get_round_prob(q_matrix)
+def get_zone_matrix(q_matrix):
+    'create matrix defining who plays who it what round'
+    zone_matrix = np.zeros_like(q_matrix)
+    for y in range(zone_matrix.shape[0]):
+        for x in range(zone_matrix.shape[1]):
+            zone_matrix[y,x] = int(math.floor(y)/2**(x+1))
+    return zone_matrix
+
+def get_p2_538():
+    return derive_p_v2(q_matrix)
 
 
+#def get_p2_528():
+ #   return derive_p_v2(q_matrix)
+
+
+#p = np.round(get_p2(),2)
 
 def derive_p_matrix(q_matrix):
     p_matrix = np.zeros((64,64))
@@ -163,7 +195,7 @@ def derive_p_matrix(q_matrix):
             dep2.shape
 
             obj= np.concatenate([np.zeros(combs),np.ones(combs*2)])
-            p_out = linprog(obj,A_2,b_2,co_matrix2,dep2).x[:combs]
+            p_out = linprog(obj,A_2,b_2,co_matrix2,dep2).x[:combs]5j
 
             for i in range(len(p_out)):
                 first_team = int(i/group_size) + blk_start
@@ -174,52 +206,9 @@ def derive_p_matrix(q_matrix):
 
 if __name__ == "__main__":
     #derive_p_matrix(q_matrix)
+
+    derive_p_v2(q_matrix)
     b = np.loadtxt('test1.txt', dtype=int)
 
     derive_p_matrix(b)
-
-'''
-silver_p = pd.DataFrame(derive_p_matrix(q_matrix))
-silver_p.to_csv(lake+"madness_538_p.csv",index=False)
-
-silver_p
-
-popular_matrix = pd.read_csv(lake+"who_picked_who.csv")
-
-popular_matrix["name"] = silver_preds.reset_index().team_name
-
-pop = pd.read_csv(lake + "who_picked_who.csv")
-
-list_df=[]
-for col in pop:
-      round_df = pop[col].str.replace("-Chicago","").str.split('-', 0,expand=True)
-      round_df.columns = ["seed_team" + col,"share" +col]
-      round_df["share"+col] = round_df["share"+col].str.rstrip("%").astype(float)*.01
-      round_df = round_df.sort_values("seed_team"+col).reset_index(drop=True)
-      list_df.append(round_df)
-
-pop_split = pd.concat(list_df,axis=1)
-pop = pop_split.filter(regex= ("share")).copy()
-pop["team"] = pop_split["seed_teamR64"].copy()
-pop["i"] = pop.index
-
-(pop >> arrange(X.team))
-
-
-#reorganize to match the 538 bracket ordering
-silver_join =(silver_preds.reset_index(drop=True) >>
-select(X.team_seed, X.team_name) >>
-mutate(messy_team = X.team_seed.map(str) + X.team_name) >>
-arrange(X.messy_team)
-)
-
-
-silver_join
-
-import difflib
-silver_join.messy_team = silver_join.messy_team.map(lambda x: difflib.get_close_matches(x, pop.team)[0])
-
-popular_matrix = pd.DataFrame(derive_p_matrix(q_matrix))
-popular_matrix.to_csv(lake+"madness_popular.csv")
-popular_matrix["name"] = silver_preds.reset_index().team_name
-'''
+=[]p

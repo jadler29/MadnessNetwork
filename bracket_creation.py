@@ -11,23 +11,21 @@ from tqdm import tqdm
 from numba import njit
 import numba
 from sklearn.model_selection import train_test_split
-import output_testing
+import sim2_p_matrix
 
-pop_P = pd.read_csv(lake+"pop_p_matrix.csv",header=None).values
-my_P = pd.read_csv(lake+"madness_538_p.csv").values
 
-p_matrix = my_P
-p_matrix_pop = pop_P
-P_MATRIX = my_P
-P_MATRIX_POP = my_P
-COMPETING_BRACKET_NUMBER = 100
-N_BRACKET_REALIZATIONS =2000
+
+
+
+
+
 def get_pool_size():
     return COMPETING_BRACKET_NUMBER
 
 
 
-
+def get_my_p():
+    return P_MATRIX
 
 def win_or_go_home(bracket):
     for rd in range(bracket.shape[1]-1):
@@ -179,9 +177,9 @@ def generate_data_std():
 
 @njit
 def win_prob(bracket):
-    results = np.ones(N_BRACKET_REALIZATIONS)*-1
-    scores = np.ones(N_BRACKET_REALIZATIONS)*-1
-    for realization_number in range(N_BRACKET_REALIZATIONS):
+    results = np.ones(N_BRACKET_REALIZATIONS*2)*-1
+    scores = np.ones(N_BRACKET_REALIZATIONS*2)*-1
+    for realization_number in range(N_BRACKET_REALIZATIONS*2):
         sample_actuals = sample_bracket(P_MATRIX)
         comp_score = 0
 
@@ -200,6 +198,19 @@ def win_prob(bracket):
 
 if __name__ == "__main__":
 
+    pop_P = pd.read_csv(lake+"pop_p_matrix.csv", header=None).values
+    my_P = pd.read_csv(lake+"madness_538_p.csv").values
+    my_p_simple = sim2_p_matrix.get_p2_538()
+
+    p_matrix = my_P
+    p_matrix_pop = pop_P
+    P_MATRIX = my_p_simple
+    P_MATRIX_POP = my_p_simple
+    COMPETING_BRACKET_NUMBER = 1
+    N_BRACKET_REALIZATIONS = 2000
+
+    import output_testing
+    """
     b = np.loadtxt('test1.txt', dtype=int)
 
 
@@ -236,4 +247,4 @@ if __name__ == "__main__":
     res = sim_head2head_unstruct(smart_P, p_matrix, p_matrix)
     print(mean(res))
 
-
+    """

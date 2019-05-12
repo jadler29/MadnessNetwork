@@ -7,11 +7,10 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
-
-import bracket_creation
+import Opt_Helpers
+os.chdir("/Users/jonahadler/Desktop/code/MadnessNetwork")
 from output_conversion import output_conversion
 
-os.chdir("/Users/jonahadler/Desktop/code/MadnessNetwork")
 
 
 class Knockout_Round_Layer(torch.autograd.Function):
@@ -102,7 +101,7 @@ class MadnessNet(torch.nn.Module):
 
             #threshold for sigmoid is the round number itself
             score += torch.sigmoid(
-                SIGMOID_STEEPNESS*(z[rd]-rd)
+                SIGMOID_STEEPNESS*(z[rd]-rd+.5)
             ).sum(dim=1)*SCORING[rd]
 
         #for r
@@ -169,19 +168,8 @@ def explore_prob(epoch):
 
 
 ############################################
-#Data
-############################################
-dtype = torch.float
-device = torch.device("cpu")
-res_train, comp_train, res_val, comp_val = [torch.tensor(
-    ar, dtype=dtype) for ar in bracket_creation.generate_data_std()]
-
-
-#%%
-############################################
 #Paramaters
 ############################################
-N = len(res_train)
 N_TEAMS = 64
 N_ROUNDS = int(math.log2(N_TEAMS))
 SIGMOID_STEEPNESS = 1e-2
@@ -191,34 +179,46 @@ EPSILON_GREEDY = .5
 lamb = 1e8
 #loss_func = best_score_loss
 loss_func = win_prob_loss
-epochs = 100
-bs = 16
+epochs =120
+bs = 8
 lr = 1e-1
 
-############################################
-#Model
-############################################
-train_ds = TensorDataset(res_train, comp_train)
-train_dl = DataLoader(train_ds, batch_size=bs)
-val_ds = TensorDataset(res_val, comp_val)
-val_dl = DataLoader(val_ds, batch_size=bs * 2)
-
-model, opt = get_model(lr)
-
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-    opt, mode="min", patience=10)
-pbar = tqdm(range(epochs), ncols=80)
 
 
-def run_opt(save_name):
+def run_opt(save_name, sim_params):
 
+    ############################################
+    #Data
+    ############################################
+    dtype = torch.float
+    device = torch.device("cpu")
+    res_train, comp_train, res_val, comp_val = [torch.tensor(
+        ar, dtype=dtype) for ar in Opt_Helpers.generate_data_std(sim_params)]
+    N = len(res_train)
+
+
+    ############################################
+    #Model
+    ############################################
+    train_ds = TensorDataset(res_train, comp_train)
+    train_dl = DataLoader(train_ds, batch_size=bs)
+
+    model, opt = get_model(lr)
+
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        opt, mode="min", patience=10)
+    pbar = tqdm(range(epochs), ncols=80)
+
+
+
+    best_win_prob, best_model = 0, None
     for epoch in pbar:
         model.train()
         epoch_score = np.zeros(N//bs+1)
         i = 0
         for res_batch, comp_batch in train_dl:
             #sometimes explore a new weight
-            if uniform(0, 10) < explore_prob(epoch) and epoch < 30:
+            if uniform(0, 10) < explore_prob(epoch) and epoch < 40:
                 with torch.no_grad():
                     #level = randint(1,6)
                     #weight_num = randint(1,63)
@@ -244,27 +244,30 @@ def run_opt(save_name):
 
         with torch.no_grad():
             bracket = output_conversion(get_w(model))
-            win_prob, mean_score, std_scores = bracket_creation.win_prob(
-                bracket)
+            win_prob, mean_score, std_scores = Opt_Helpers.win_prob(
+                bracket,sim_params)
+            if win_prob > best_win_prob:
+                best_win_prob = win_prob
+                best_model = model
 
         epoch_avg = np.mean(epoch_score)
         scheduler.step(epoch_avg)
-        #print("epoch ", epoch, "; ", epoch_avg)
+
         pbar.set_description(
             ("Avg reward: {: 0.6f} | OOS Win Prob: {: 0.3f} | Avg Score: {: 0.1f} | STD Score: {: 0.1f}").format(
                 -epoch_avg/GAMMA, win_prob, mean_score, std_scores))
 
-        print("\n", get_w(model)[2])
+        #print("\n", get_w(model)[2])
+    
     with torch.no_grad():
-        bracket = output_conversion(get_w(model))
-        win_p, mean_score, std_scores = bracket_creation.win_prob(
-            bracket)
-    np.savetxt(save_name, output_conversion(get_w(model)), fmt='%d')
-    return output_conversion(get_w(model)), win_p
+        bracket = output_conversion(get_w(best_model))
+        win_p, mean_score, std_scores = Opt_Helpers.win_prob(
+            bracket,sim_params)
+        print("best model win prob: ", win_prob)
+    np.savetxt(save_name, output_conversion(get_w(best_model)), fmt='%d')
+    return output_conversion(get_w(best_model)), win_p
 
 
-if __name__ == "__main__":
-    run_opt("../std.txt")
 
 #w = get_w(model)
 #np.savetxt('test3.txt', output_conversion(get_w(model)), fmt='%d')

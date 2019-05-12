@@ -213,53 +213,62 @@ model, opt = get_model(lr)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     opt, mode="min", patience=10)
 pbar = tqdm(range(epochs), ncols=80)
+pbar2 = tqdm(range(20), ncols=80)
 
 
 def run_opt(save_name):
 
-    for epoch in pbar:
-        model.train()
-        epoch_score = np.zeros(N//bs+1)
-        i = 0
-        for res_batch, comp_batch in train_dl:
-            #sometimes explore a new weight
-            if uniform(0, 10) < explore_prob(epoch) and epoch < 30:
-                with torch.no_grad():
-                    #level = randint(1,6)
-                    #weight_num = randint(1,63)
-                    level, index = random_w()
-                    changing_w = model.w[level]
-                    changing_w[index] = randint(0, 1)
-                    model.w[level] = changing_w
+    for rd in range(1, len(model.w)):
+        model.w[rd].require_grad = True
+        model.w[:rd:].require_grad = False
+        pbar = tqdm(range(epochs), ncols=80)
+        for epoch in pbar:
+            
+            model.train()
+            epoch_score = np.zeros(N//bs+1)
+            i = 0
+            for res_batch, comp_batch in train_dl:
+                #sometimes explore a new weight
+                if uniform(0, 10) < explore_prob(epoch) and epoch < 1:
+                    with torch.no_grad():
+                        #level = randint(1,6)
+                        #weight_num = randint(1,63)
+                        level, index = random_w()
+                        changing_w = model.w[level]
+                        changing_w[index] = randint(0, 1)
+                        model.w[level] = changing_w
 
-            # Forward pass: Compute predicted y by passing x to the model
-            score = model(res_batch)
+                # Forward pass: Compute predicted y by passing x to the model
+                score = model(res_batch)
 
-            # Compute and print loss
-            loss, metric = loss_func(score, lamb, punish(model.w), comp_batch)
-            epoch_score[i] = loss
+                # Compute and print loss
+                loss, metric = loss_func(score, lamb, punish(model.w), comp_batch)
+                epoch_score[i] = loss
 
-            # Zero gradients, perform a backward pass, and update the weights.
-            loss.backward()
-            opt.step()
-            opt.zero_grad()
+                # Zero gradients, perform a backward pass, and update the weights.
+                loss.backward()
+                opt.step()
+                opt.zero_grad()
 
-            i += 1
-            model.eval()
+                i += 1
+                model.eval()
 
-        with torch.no_grad():
-            bracket = output_conversion(get_w(model))
-            win_prob, mean_score, std_scores = bracket_creation.win_prob(
-                bracket)
+            with torch.no_grad():
+                bracket = output_conversion(get_w(model))
+                win_prob, mean_score, std_scores = bracket_creation.win_prob(
+                    bracket)
 
-        epoch_avg = np.mean(epoch_score)
-        scheduler.step(epoch_avg)
-        #print("epoch ", epoch, "; ", epoch_avg)
-        pbar.set_description(
-            ("Avg reward: {: 0.6f} | OOS Win Prob: {: 0.3f} | Avg Score: {: 0.1f} | STD Score: {: 0.1f}").format(
-                -epoch_avg/GAMMA, win_prob, mean_score, std_scores))
+            epoch_avg = np.mean(epoch_score)
+            scheduler.step(epoch_avg)
+            #print("epoch ", epoch, "; ", epoch_avg)
+            pbar.set_description(
+                ("Avg reward: {: 0.6f} | OOS Win Prob: {: 0.3f} | Avg Score: {: 0.1f} | STD Score: {: 0.1f}").format(
+                    -epoch_avg/GAMMA, win_prob, mean_score, std_scores))
 
-        print("\n", get_w(model)[2])
+        
+    
+       
+
     with torch.no_grad():
         bracket = output_conversion(get_w(model))
         win_p, mean_score, std_scores = bracket_creation.win_prob(
@@ -268,9 +277,9 @@ def run_opt(save_name):
     return output_conversion(get_w(model)), win_p
 
 
-if __name__ == "__main__":
-    run_opt("../std.txt")
-
+#if __name__ == "__main__":
+#    run_opt("../std.txt")
+run_opt("../std.txt")
 #w = get_w(model)
 #np.savetxt('test3.txt', output_conversion(get_w(model)), fmt='%d')
 #np.savetxt('test1.txt', output_conversion(get_w(model)), fmt='%d')
