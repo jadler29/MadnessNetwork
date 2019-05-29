@@ -10,7 +10,10 @@ Many people have tackled the problem of predicting the outcomes of March Madness
 1. A primer on the March Madness Bracket creation scenario
 2. An investiagtion of the neural archetecture we design to optimize brackets
 3. A look at what the results tell us about making good future brackets and beyond
-  - if you are building a bracket and have no desire to touch an code, feel free to skip to part 3!
+
+(if you are building a bracket and have no desire to touch any code, feel free to skip to part 3!)
+
+
 
 
 ### Markdown
