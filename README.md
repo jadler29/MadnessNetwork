@@ -14,7 +14,7 @@ Many people have tackled the problem of predicting the outcomes of March Madness
 (if you are building a bracket and have no desire to touch any code, feel free to skip to part 3!)
 
 
-
+<img src="https://latex.codecogs.com/gif.latex?O_t=\text { Onset event at time bin } t " /> 
 
 ### Markdown
 
