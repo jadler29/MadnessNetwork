@@ -1,8 +1,8 @@
-## Welcome to GitHub Pages
+## Optimizing March Madness brackets with Bracket Networks and SGD
 
-You can use the [editor on GitHub](https://github.com/jadler29/MadnessNetwork/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+Many people have tackled the problem of predicting the outcomes of March Madness games, or even win probabilities, but even with accurate win probabilities how can we build optimal brackets? The answer is not as obvious as it may seem. 
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+
 
 ### Markdown
 
