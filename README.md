@@ -13,8 +13,8 @@ Many people have tackled the problem of predicting the outcomes of March Madness
 
 (if you are building a bracket and have no desire to touch any code, feel free to skip to part 3!)
 
+![equation](https://latex.codecogs.com/gif.latex?O_t%3D%5Ctext%20%7B%20Onset%20event%20at%20time%20bin%20%7D%20t)
 
-<img src="https://latex.codecogs.com/gif.latex?O_t=\text { Onset event at time bin } t " /> 
 
 ### Markdown
 
