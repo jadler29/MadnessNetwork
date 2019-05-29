@@ -15,6 +15,7 @@ Many people have tackled the problem of predicting the outcomes of March Madness
 
 ![equation](https://latex.codecogs.com/gif.latex?O_t%3D%5Ctext%20%7B%20Onset%20event%20at%20time%20bin%20%7D%20t)
 
+\\[ \frac{1}{n^{2}} \\]
 
 ### Markdown
 
