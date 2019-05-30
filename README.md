@@ -33,7 +33,7 @@ Much work has been done to estimate the probabilities of game outcomes; we will 
 
 
 We will take these probabilities as ground truth and call this matrix $\bold{Q_{true}}$.
-
+ 
 $$
  \boldsymbol{Q_{true}} =
 \begin{pmatrix}
