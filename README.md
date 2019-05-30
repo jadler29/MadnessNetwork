@@ -22,18 +22,13 @@ March madness is arguably the most exiting three weeks in sports TV. 68 college 
 Many people enter there bracket in a pool with their friends or coworkers. I can't help you get the perfect bracket, not even close, but I can help you win that pool. 
 
 
-![equation](https://latex.codecogs.com/gif.latex?O_t%3D%5Ctext%20%7B%20Onset%20event%20at%20time%20bin%20%7D%20t)
+"538"
 
-
-![alt text][logo]
-
-[logo]: https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/538.png "538"
-
-We will call this matrix $$Q$$ the other $$P$$
+We will call this matrix $Q$ the other $P$
 
 
 $$
-Q = P^2
+Q = P^2 + 5
 $$
 
  
