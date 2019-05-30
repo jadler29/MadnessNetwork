@@ -94,7 +94,7 @@ So what do you guess? If your like me and just want to maximize your chance at t
 
 <image>
 
-What is your guess now? ...
+What is your guess now? ... 
 
 
 Here, we have maximized the weighted proportion of the outcome space that we "own," or where our guess is the single best of the pack. 
