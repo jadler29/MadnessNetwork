@@ -33,7 +33,7 @@ Many people enter there bracket in a pool with their friends or coworkers. I can
 
 
 $$
-Q = \text{rank}(\mathcal{F})
+Q = P^2
 $$
 
 
