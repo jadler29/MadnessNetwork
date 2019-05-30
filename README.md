@@ -130,6 +130,34 @@ We need a clever way to tackle this problem.. Its time for part 2.
 
 # Part 2: Optimizing with "Bracket Networks"
 
+As mentioned at the end of part 1, our problem of optimizing our bracket is non-convex. And, unfortunately, non-convex optimization problems are hard to solve. Yet, one set of non-convex set of optimization problems is econutered and delt with often in todays world, namely, optimizing the weights of deep neural networks. 
+
+Despite the theoretical difficulty of optimizing these networks, in practice, stochastic gradient descent seems to give us good (though not necessarily globally optimal) solutions. Is there a way we can apply the same methods to our problem? 
+
+
+
+## A bracket as a neural network
+
+The goal is here is to model the scoring of our bracket with a deep-network structure. If we can do so successfully, we can use backpropogation and SGD to optimize our score. 
+
+
+I will present my proposed structure first and the we will dissect why it works. 
+
+For simplicity, consider a tournament of only 4 teams (with a slightly unrealistic 4 colleges for a march madness tourney)
+
+
+
+![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/2x2.png)
+
+
+
+![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/simple_net.png)
+
+
+
+
+
+
 
 
 
