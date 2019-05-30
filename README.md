@@ -1,4 +1,4 @@
-{% include lib/mathjax.html %}
+{% include lib/mathjax.html %} 
 
 # Optimizing March Madness brackets with Bracket Networks and SGD
 
