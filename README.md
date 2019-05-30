@@ -1,6 +1,6 @@
 {% include lib/mathjax.html %} 
 
-# Optimizing March Madness brackets with Bracket Networks and SGD
+# Optimizing March Madness brackets with Bracket Networks and SGD 
 
 Many people have tackled the problem of predicting the outcomes of March Madness games, or even win probabilities, but even with accurate win probabilities how can we build optimal brackets? The answer is not as obvious as it may seem. 
 
