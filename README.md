@@ -29,6 +29,7 @@ Many people enter there bracket in a pool with their friends or coworkers. I can
 
 [logo]: https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/538.png "538"
 
+We will call this matrix $$Q$$ the other $$P$$
 
 
 $$
