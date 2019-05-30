@@ -35,7 +35,7 @@ Much work has been done to estimate the probabilities of game outcomes; we will 
 We will take these probabilities as ground truth and call this matrix $\bold{Q_{true}}$.
 
 $$
- \bm{Q_{true}} =
+ \boldsymbol{Q_{true}} =
 \begin{pmatrix}
     .99 & .91 & .72 &  .52 & .32 & .19 \\
     .98 & .88 & .73 &  .49 & .32 & .17 \\
