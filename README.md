@@ -21,6 +21,7 @@ March Madness is arguably the most exiting three weeks in sports TV. 64 college 
 
 Many people enter their bracket in a pool with their friends or coworkers. I can't help you get the perfect bracket, not even close, but I can help you win that pool. 
 
+## Predicted Outcomes
 
 Much work has been done to estimate the probabilities of game outcomes; we will not tackle this problem here. Instead we will use fivethirtyeight.com's predictions which are an aggregate of several other prediction metrics. Prior to the tournament, fivethirtyeight provides a probability each team has of winning in every round. 
 
@@ -49,15 +50,6 @@ $$
 
 More concretely, we can represent a tournament Outcome $\boldsymbol{O}$ with a 64 x 6 matrix where each entry represents whether a team wins in a specific round. For instance, since UVA won in 2019, we would have something like
 
-[//]: # ($O_{rt} =
-\begin{cases}
-    1, & \text{if team }r \text{ wins in round }t \\
-    0, & \text{otherwise}
-\end{cases}
-$ )
-
-
-
 $$
 \boldsymbol{O_{2019}}=
 \begin{pmatrix}
@@ -70,17 +62,19 @@ $$
 
 
 So with $\boldsymbol{Q_{true}}$ as ground truth we say 
-$$\boldsymbol{O} \sim P(\boldsymbol{Q_{true}})$$
+$$\boldsymbol{O} \sim p(\boldsymbol{Q_{true}})$$
+
+Where $p(\boldsymbol{Q})$ is the probability distribution* of brackets inferred by $\boldsymbol{Q}$
 
 *deriving this probability distribution is actually from a $\boldsymbol{Q}$ matrix requires some thought, I will not discuss it here but if you are curious, see the code or ask me! 
 
 
 
 
----
+## The Competition
 
 
-But if we know the "true" probabilities for each game isn't our task easy? We can just pick the most likely team in each round.. not so fast! As many other works have noted, picking the favorite in every game is not an optimal strategy. If our goal was simply to maximize our bracket's expected score, then, yes, picking ground truth favorites would always be best. Our problem is more complex, we are trying to maximize the probability our bracket wins (scores highest among our pool). We can illustrate this difference with an analogy.
+But if we know the "true" probabilities for each game isn't our task easy? We can just pick the most likely team in each round.. not so fast! As many other works have noted, picking the favorite in every game is not an optimal strategy. If our goal was simply to maximize our bracket's expected score, then, yes, picking ground truth favorites would always be best. However, our problem is more complex, we are trying to maximize the probability our bracket wins (scores highest among our pool). We can illustrate this difference with an analogy.
 
 
 ![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/jellybeans2.png)
@@ -90,7 +84,7 @@ Imagine you are at a carnival. You come across a booth where you task is to gues
 
 <image>
 
-So what do you guess? If your like me and just want to maximize your chance at the $200, then 100 of course! But now imagine the rules are different: instead of having to guess number of beans exactly, you just have to be closer than everyone else to win. Your friend tells you to come by at the very end of the carnival, and not only gives you the bean distribution as before, but he also gives you a list of the other guesses people have made. 
+So what do you guess? If your like me and just want to maximize your chance at the $200, then 100 of course! But now imagine the rules are different: instead of having to guess number of beans exactly, you just have to be closer than everyone else. Your friend tells you to come by at the very end of the carnival, and not only gives you the bean distribution as before, but he also gives you a list of the other guesses people have made. 
 
 <image>
 
@@ -99,7 +93,7 @@ What is your guess now? ...
 
 Here, we have maximized the weighted proportion of the outcome space that we "own," or where our guess is the single best of the pack. 
 
-Back to March Madness, our goal is the same, find a bracket that "owns" the greatest proportion of the weighted tournament outcomes with respect to our pool of competitors. While we dont know exactly what other's brackets are, we can guess; enter ESPN'S Who Picked whom. 
+Back to March Madness, our goal is the same, find a bracket that "owns" the greatest proportion of the weighted tournament outcomes with respect to our pool of competitors. While we don't know exactly what other's brackets are, we can guess; enter ESPN'S Who Picked whom. 
 
 Every year, ESPN posts statistics on how how all entered brackets are created.
 
@@ -109,12 +103,34 @@ Every year, ESPN posts statistics on how how all entered brackets are created.
 
 We call this $\boldsymbol{Q_{pop}}$. If we assume that our pool competitors are not far from the general people who create ESPN brackets, we can sample a competitors bracket, $\boldsymbol{C}$ (a 64 x 6 matrix just like $\boldsymbol{O}$) based on $\boldsymbol{Q_{pop}}$. That is
 
-$$\boldsymbol{C} \sim P(\boldsymbol{Q_{pop}})$$
+$$\boldsymbol{C} \sim p(\boldsymbol{Q_{pop}})$$
 
 
+## Scoring
+
+Now that we have a distribution of bracket outcomes and of opponent's brackets we can start to think about building our bracket. First lets touch on scoring. 
+
+March madness brackets are usually scored in some variation of the same format. Each time a team is correctly called to win in a round r, $2^{r-1}$ points are awarded. Thus, given an outcome $\boldsymbol{O}$ and bracket $\boldsymbol{B}$
+, we can easily generate a score, $score(\boldsymbol{B},\boldsymbol{O}).$
+
+## Building Our Bracket
+
+Now we can define our goal. Recall that we aim to maximize the probability that our bracket is the best of the bunch.
+
+$$\max_{\boldsymbol{B}} P(score(\boldsymbol{B},\boldsymbol{O}) > score(\boldsymbol{C_i},\boldsymbol{O}) \quad \forall i \in 1...n\_competitors) $$
 
 
-Who picked 
+Using the law of large numbers we can estimate this probability with a large number of events: 
+
+$$\max_{\boldsymbol{B}} \quad \frac{1}{big\_number}\sum_{t=0}^{big\_number}(score(\boldsymbol{B},\boldsymbol{O_t}) > score(\boldsymbol{C_{it}},\boldsymbol{O_t}) \quad \forall i \in 1...n\_competitors)$$
+
+Ok so are we ready to go? We can read up on some class optimization methods and chug away... not quite. In fact, once we include the constraints that our bracket $\boldsymbol{B}$ is a valid bracket (doesnt pick every team to win every game for instance), the optimization problem is very messy and highly convex.. ugh. 
+
+We need a clever way to tackle this problem.. Its time for part 2. 
+
+
+# Part 2: Optimizing with "Bracket Networks"
+
 
 
 ```python
