@@ -32,7 +32,7 @@ Much work has been done to estimate the probabilities of game outcomes; we will 
 
 
 
-We will take these probabilities as ground truth and call this matrix $\bold{Q_{true}}$.
+We will take these probabilities as ground truth and call this matrix $\boldsymbol{Q_{true}}$.
  
 $$
  \boldsymbol{Q_{true}} =
@@ -44,10 +44,10 @@ $$
 \end{pmatrix}
 $$
 
- When I say ground truth I mean that if I were to sample the outcome of a tournament, I would sample it based on $\bold{Q_{true}}$.
+ When I say ground truth I mean that if I were to sample the outcome of a tournament, I would sample it based on $\boldsymbol{Q_{true}}$.
 
 
-More concretely, we can represent a tournament Outcome $\bold{O}$ with a 64 x 6 matrix where each entry represents whether a team wins in a specific round. For instance, since UVA won in 2019, we would have something like
+More concretely, we can represent a tournament Outcome $\boldsymbol{O}$ with a 64 x 6 matrix where each entry represents whether a team wins in a specific round. For instance, since UVA won in 2019, we would have something like
 
 [//]: # ($O_{rt} =
 \begin{cases}
@@ -59,7 +59,7 @@ $ )
 
 
 $$
-\bold{O_{2019}}=
+\boldsymbol{O_{2019}}=
 \begin{pmatrix}
     1 & 1 & 1 &  1 & 0 & 0 \\
     1 & 1 & 1 &  1 & 1 & 1 \\
@@ -69,10 +69,10 @@ $$
 $$
 
 
-So with $\bold{Q_{true}}$ as ground truth we say 
-$$\bold{O} \sim P(\bold{Q_{true}})$$
+So with $\boldsymbol{Q_{true}}$ as ground truth we say 
+$$\boldsymbol{O} \sim P(\boldsymbol{Q_{true}})$$
 
-*deriving this probability distribution is actually from a $\bold{Q}$ matrix requires some thought, I will not discuss it here but if you are curious, see the code or ask me! 
+*deriving this probability distribution is actually from a $\boldsymbol{Q}$ matrix requires some thought, I will not discuss it here but if you are curious, see the code or ask me! 
 
 
 
@@ -103,11 +103,13 @@ Back to March Madness, our goal is the same, find a bracket that "owns" the grea
 
 Every year, ESPN posts statistics on how how all entered brackets are created.
 
+
 ![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/wpw.png)
 
-We call this $\bold{Q_{pop}}$. If we assume that our pool competitors are not far from the general people who create ESPN brackets, we can sample a competitors bracket, $\bold{C}$ (a 64 x 6 matrix just like $\bold{O}$) based on $\bold{Q_{pop}}$. That is
 
-$$\bold{C} \sim P(\bold{Q_{pop}})$$
+We call this $\boldsymbol{Q_{pop}}$. If we assume that our pool competitors are not far from the general people who create ESPN brackets, we can sample a competitors bracket, $\boldsymbol{C}$ (a 64 x 6 matrix just like $\boldsymbol{O}$) based on $\boldsymbol{Q_{pop}}$. That is
+
+$$\boldsymbol{C} \sim P(\boldsymbol{Q_{pop}})$$
 
 
 
