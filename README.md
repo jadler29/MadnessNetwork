@@ -115,14 +115,16 @@ March madness brackets are usually scored in some variation of the same format. 
 
 Now we can define our goal. Recall that we aim to maximize the probability that our bracket is the best of the bunch.
 
-$$\max_{\boldsymbol{B}} P(score(\boldsymbol{B},\boldsymbol{O}) > score(\boldsymbol{C_i},\boldsymbol{O}) \quad \forall i \in 1...n\_competitors) $$
+$$\max_{\boldsymbol{B}} \quad P(score(\boldsymbol{B},\boldsymbol{O}) > score(\boldsymbol{C_i},\boldsymbol{O}) \quad \forall i \in 1...n\_competitors) $$
 
 
 Using the law of large numbers we can estimate this probability with a large number of events: 
 
-$$\max_{\boldsymbol{B}} \quad \frac{1}{big\_number}\sum_{t=0}^{big\_number}(score(\boldsymbol{B},\boldsymbol{O_t}) > score(\boldsymbol{C_{it}},\boldsymbol{O_t}) \quad \forall i \in 1...n\_competitors)$$
+$$\max_{\boldsymbol{B}} \quad \frac{1}{BIG}\sum_{t=0}^{BIG}\mathbb{I}(score(\boldsymbol{B},\boldsymbol{O_t}) > score(\boldsymbol{C_{it}},\boldsymbol{O_t}) \quad \forall i \in 1...n\_competitors)$$
 
-Ok so are we ready to go? We can read up on some classic optimization methods and chug away... not quite. In fact, once we include the constraints that our bracket $\boldsymbol{B}$ is a valid bracket (doesnt pick every team to win every game for instance), the optimization problem is very messy and highly convex.. ugh. 
+where $\mathbb{I}$ is the indicator function
+
+Ok so are we ready to go? We can read up on some classic optimization methods and chug away... not quite. In fact, once we include the constraints that our bracket $\boldsymbol{B}$ is a valid bracket (doesnt pick every team to win every game for instance), the optimization problem is very messy and highly non-convex.. ugh. 
 
 We need a clever way to tackle this problem.. Its time for part 2. 
 
@@ -130,7 +132,7 @@ We need a clever way to tackle this problem.. Its time for part 2.
 
 # Part 2: Optimizing with "Bracket Networks"
 
-As mentioned at the end of part 1, our problem of optimizing our bracket is non-convex. And, unfortunately, non-convex optimization problems are hard to solve. Yet, one set of non-convex set of optimization problems is econutered and delt with often in todays world, namely, optimizing the weights of deep neural networks. 
+As mentioned at the end of part 1, our problem of optimizing our bracket is non-convex. And, unfortunately, non-convex optimization problems are hard to solve. Yet, one set of non-convex  optimization problems is encountered and dealt with often in todays world, namely, optimizing the weights of deep neural networks. 
 
 Despite the theoretical difficulty of optimizing these networks, in practice, stochastic gradient descent seems to give us good (though not necessarily globally optimal) solutions. Is there a way we can apply the same methods to our problem? 
 
@@ -141,20 +143,70 @@ Despite the theoretical difficulty of optimizing these networks, in practice, st
 The goal is here is to model the scoring of our bracket with a deep-network structure. If we can do so successfully, we can use backpropogation and SGD to optimize our score. 
 
 
-I will present my proposed structure first and the we will dissect why it works. 
 
-For simplicity, consider a tournament of only 4 teams (with a slightly unrealistic 4 colleges for a march madness tourney)
-
+For simplicity, consider a tournament of only 4 teams (with a slightly biased choice of universities)
 
 
 ![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/2x2.png)
 
 
+In this case our decisions in creating a bracket can be reduced to 3 binary choices. 
+$w_{1,1} =
+\begin{cases}
+    1, & \text{if we pick Duke to win in round 1}\\
+    0, & \text{if we pick MIT}
+\end{cases}
+$
+$w_{1,2} =
+\begin{cases}
+    1, & \text{if we pick Northwestern to win in round 1}\\
+    0, & \text{if we pick Harvard}
+\end{cases}
+$
+
+$w_{2,1} =
+\begin{cases}
+    1, & \text{if we pick our winner from MIT vs. Duke to win in Round 2}\\
+    0, & \text{if we pick our winner from NU vs Harvard to win in Round 2}
+\end{cases}
+$
+
+Now consider the proposed structure:
 
 ![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/simple_net.png)
 
+Note that $r_i =$ The scoring coefficient for round $i$; $S$ represents the sigmoid function $S(x) = \frac{1}{1+e^{-x}}$
+
+This structure is engineered such that if the actual numbers of wins is given as input to the network, $z_{output}$ gives the score of our created bracket against the actual result! 
 
 
+The best way to understand why it works is to run through a theoretical example yourself. Consider a created bracket and an actual outcome, and run a forward pass through the network to get the score $z_{output}$. 
+
+Intuitively though, $z_{r,n}$  represents how many wins the team we picked (in block $n$) to win in round $r$ actually got. Thus a $z_{1,1} =1$ means that the team we picked to win block 1, round 1 actually got 1 win in the tournament, thus the pick was right. On layer 2 however, $z_{2,1}=1$  means that the team we picked to win the mini tourney only won 1 game, thus this pick was not correct. 
+
+The green sigmoid* nodes check whether z values have the requisite value for a correct guess and "fire" 1 if so, 0 otherwise. These values are then properly weighted by the corresponding round scoring $r$ before being summed out for the total score $z_{output}$
+
+This framework is easily extended to fit a 64 team tournament. 
+
+*an obvious question is why use sigmoids here? Can't we model the system more perfectly with a step function? Yes, this is true, however, in practice the sigmoid provides significant benefits when we get to optimization; the sigmoid allows for much richer gradients
+
+addtionally why the -.5 (or -1.5)? ......
+
+
+## Extending the Structure to Winning 
+
+There are two things we are missing in our model of our problem so far:
+ 1. A way to account for the competitors brackets
+ 2. A way to account for the uncertainty in outcomes (and in competitors brackets)
+
+Fortunately, our structure lends itself to accounting for these elements easily. We will stick with the 4 team tourney for ease of demonstration. 
+
+
+
+To check for a victory our pool, we want to see our score, $z_{output}$, is greater than the maximum of our competitor's scores. In the case the we have 3 competing brackets, for instance, we sample 3 competing brackets $C$ as discussed in part 1, score them based on the actual tourney result, take the maximum of the 3, and then can compare it with $z_{output}$ to see who wins. We can execute this comparison with a sigmoid 
+
+
+![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/full_net.png)
 
 
 
@@ -162,7 +214,28 @@ For simplicity, consider a tournament of only 4 teams (with a slightly unrealist
 
 
 ```python
-import torch
+@staticmethod
+def forward(ctx, input, weight):
+    """
+    In the forward pass we receive a Tensor containing the input and return
+    a Tensor containing the output. ctx is a context object that can be used
+    to stash information for backward computation. You can cache arbitrary
+    objects for use in the backward pass using the ctx.save_for_backward method.
+    """
+    weight = torch.clamp(weight, 0, 1)
+    ctx.save_for_backward(input, weight)
+    w_new = torch.empty(2*len(weight), dtype=weight.dtype)
+    w_new[0::2] = weight
+    w_new[1::2] = 1-weight
+
+    weighted_a = input*w_new
+    eye = torch.eye(len(weight))
+
+    assignment = torch.nn.functional.interpolate(
+        eye.unsqueeze(0), size=(len(weight)*2)).squeeze(0).t()
+    z = weighted_a.mm(assignment)
+
+    return z
 
 ```
 
