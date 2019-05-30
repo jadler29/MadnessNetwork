@@ -82,21 +82,19 @@ But if we know the "true" probabilities for each game isn't our task easy? We ca
 
 Imagine you are at a carnival. You come across a booth where you task is to guess how many jellybeans are in a jar. if you get it right, you win $200. Lucky for you, a friend of yours works at the booth and fills up the jar himself. He hints to you that the number of beans follows a normal distribution with mean 100 and standard deviation 10. 
 
-<image>
+image
 
 So what do you guess? If your like me and just want to maximize your chance at the $200, then 100 of course! But now imagine the rules are different: instead of having to guess number of beans exactly, you just have to be closer than everyone else. Your friend tells you to come by at the very end of the carnival, and not only gives you the bean distribution as before, but he also gives you a list of the other guesses people have made. 
 
-<image>
+image
 
 What is your guess now? ... 
-
 
 Here, we have maximized the weighted proportion of the outcome space that we "own," or where our guess is the single best of the pack. 
 
 Back to March Madness, our goal is the same, find a bracket that "owns" the greatest proportion of the weighted tournament outcomes with respect to our pool of competitors. While we don't know exactly what other's brackets are, we can guess; enter ESPN'S Who Picked whom. 
 
 Every year, ESPN posts statistics on how how all entered brackets are created.
-
 
 ![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/wpw.png)
 
