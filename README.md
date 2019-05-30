@@ -122,17 +122,19 @@ Using the law of large numbers we can estimate this probability with a large num
 
 $$\max_{\boldsymbol{B}} \quad \frac{1}{big\_number}\sum_{t=0}^{big\_number}(score(\boldsymbol{B},\boldsymbol{O_t}) > score(\boldsymbol{C_{it}},\boldsymbol{O_t}) \quad \forall i \in 1...n\_competitors)$$
 
-Ok so are we ready to go? We can read up on some class optimization methods and chug away... not quite. In fact, once we include the constraints that our bracket $\boldsymbol{B}$ is a valid bracket (doesnt pick every team to win every game for instance), the optimization problem is very messy and highly convex.. ugh. 
+Ok so are we ready to go? We can read up on some classic optimization methods and chug away... not quite. In fact, once we include the constraints that our bracket $\boldsymbol{B}$ is a valid bracket (doesnt pick every team to win every game for instance), the optimization problem is very messy and highly convex.. ugh. 
 
 We need a clever way to tackle this problem.. Its time for part 2. 
+
 
 
 # Part 2: Optimizing with "Bracket Networks"
 
 
 
+
 ```python
-#Syntax highlighted code block
+import torch
 
 ```
 
