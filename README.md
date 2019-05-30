@@ -77,8 +77,6 @@ $$\bold{O} \sim P(\bold{Q_{true}})$$
 
 
 
-
-
 ---
 
 
@@ -103,8 +101,18 @@ Here, we have maximized the weighted proportion of the outcome space that we "ow
 
 Back to March Madness, our goal is the same, find a bracket that "owns" the greatest proportion of the weighted tournament outcomes with respect to our pool of competitors. While we dont know exactly what other's brackets are, we can guess; enter ESPN'S Who Picked whom. 
 
+Every year, ESPN posts statistics on how how all entered brackets are created.
+
+![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/wpw.png)
+
+We call this $\bold{Q_{pop}}$. If we assume that our pool competitors are not far from the general people who create ESPN brackets, we can sample a competitors bracket, $\bold{C}$ (a 64 x 6 matrix just like $\bold{O}$) based on $\bold{Q_{pop}}$. That is
+
+$$\bold{C} \sim P(\bold{Q_{pop}})$$
 
 
+
+
+Who picked 
 
 
 ```python
