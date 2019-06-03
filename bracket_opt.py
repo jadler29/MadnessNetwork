@@ -15,21 +15,25 @@ from output_conversion import output_conversion
 
 class Knockout_Round_Layer(torch.autograd.Function):
     """
-    We can implement our own custom autograd Functions by subclassing
-    torch.autograd.Function and implementing the forward and backward passes
-    which operate on Tensors.
+    We can sublass PyTorch's autograd function to create our
+    autograd function for a general knockout round tranformation. 
+    Then, PyTorch will handle gradients for us. 
+
     """
     @staticmethod
     def forward(ctx, input, weight):
         """
-        In the forward pass we receive a Tensor containing the input and return
-        a Tensor containing the output. ctx is a context object that can be used
-        to stash information for backward computation. You can cache arbitrary
-        objects for use in the backward pass using the ctx.save_for_backward method.
+
+        In the forward pass we receive a Tensor containing the input 
+        and return a Tensor containing the output. 
+        ctx is a context object that can be used
+        to stash information for backward computation
         """
         weight = torch.clamp(weight, 0, 1)
         ctx.save_for_backward(input, weight)
         w_new = torch.empty(2*len(weight), dtype=weight.dtype)
+
+        #weight share with 1-w
         w_new[0::2] = weight
         w_new[1::2] = 1-weight
 
@@ -45,14 +49,14 @@ class Knockout_Round_Layer(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad_output):
         """
-        In the backward pass we receive a Tensor containing the gradient of the loss
-        with respect to the output, and we need to compute the gradient of the loss
-        with respect to the input.
+        Here we receive the gradient of loss with respect to 
+        the output, dL_dO,
+        and need to return the loss w.r.t the input, dL_di. 
+        We can calculate dO_dw and use the chain rule 
         """
         input, weight = ctx.saved_tensors
         dL_dO = grad_output.clone()
-        is_in_of_bounds = (weight < 1) * (weight > 0)
-        dO_dw = (input[:, 0::2]-input[:, 1::2])  # *is_in_of_bounds.float()
+        dO_dw = (input[:, 0::2]-input[:, 1::2])  
         dL_di = dL_dO * dO_dw
 
         return None, dL_di
@@ -61,8 +65,7 @@ class Knockout_Round_Layer(torch.autograd.Function):
 class MadnessNet(torch.nn.Module):
     def __init__(self):
         """
-        In the constructor we instantiate two nn.Linear modules and assign them as
-        member variables.
+        Init weights to random values 0<->1 and clamp .4 <->.6
         """
         super(MadnessNet, self).__init__()
 
@@ -79,20 +82,11 @@ class MadnessNet(torch.nn.Module):
         self.w = torch.nn.ParameterList(w_list)
         self.knockout = Knockout_Round_Layer.apply
 
-        #self.register_parameter("w1", self.w1)
 
-        #self.linear2 = torch.nn.Linear(H, D_out)
     def forward(self, x):
         """
-        In the forward function we accept a Tensor of input data and we must return
-        a Tensor of output data. We can use Modules defined in the constructor as
-        well as arbitrary operators on Tensors.
+        Apply bracket network transformation
         """
-
-        #z = [0]*6
-        #z[0] = x
-        #z[1] = knockout(x, self.w1)
-        #z[2] = knockout(z[1], self.w2)
         z = []
         score = torch.zeros((x.shape[0]))
         z.append(x)
@@ -104,8 +98,6 @@ class MadnessNet(torch.nn.Module):
                 SIGMOID_STEEPNESS*(z[rd]-rd+.5)
             ).sum(dim=1)*SCORING[rd]
 
-        #for r
-        #score = torch.sigmoid(-1+1*z[1]).sum() + torch.sigmoid(-2+1*z[2]).sum()
 
         return score
 
