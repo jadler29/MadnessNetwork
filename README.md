@@ -80,19 +80,17 @@ So what do you guess? If your like me and just want to maximize your chance at t
 
 What is your guess now? 
 
-100 is still the most likely single outcome, furthermore, guessing 100 minimizes your expected deviation from the answer. Yet, it is easy to see why guessing 100 gives you a very low probability of winning! If you guess 100, the range for the answer where you win is extremely narrow, because of the high number of nearby competitors. If you find a hole in the competition's portfolio, say at 113, you increase winning range signficantly.
+100 is still the most likely single outcome, furthermore, guessing 100 minimizes our expected deviation from the answer. Yet, it is easy to see why guessing 100 gives us a very low probability of winning! If we guess 100, the range for the answer where we win is extremely narrow, because of the high number of nearby competitors. On the other hand, guessing 113 gives us a much better chance at the $200. Though the outcomes for which we win are individually less likely, the weighted sum of winning outcome probabilities (area under the curve) is significantly greater
 
-Guess 100           |  Guess 112
+Guess 100           |  Guess 113
 :-------------------------:|:-------------------------:
 ![](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/100_guess.png) |  ![](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/112_guess.png)
 
-Even though 
+By guessing 113, we have maximized the weighted proportion of the outcome space that we "own," or where our guess is the single best of the pack.
 
-Here, we have maximized the weighted proportion of the outcome space that we "own," or where our guess is the single best of the pack.
+Back to March Madness, our goal is the same, find a bracket that "owns" the greatest proportion of the weighted tournament outcomes with respect to our pool of competitors. Unfortunately, brackets are far more complex than a single random variable, moreover we don't know exactly what other's brackets are. Therefore, we will need a more carful approach.
 
-Back to March Madness, our goal is the same, find a bracket that "owns" the greatest proportion of the weighted tournament outcomes with respect to our pool of competitors. While we don't know exactly what other's brackets are, we can guess; enter ESPN'S Who Picked whom. 
-
-Every year, ESPN posts statistics on how how all entered brackets are created.
+To start, we can learn about how other's make their brackets with ESPN's Who Picked Whom. Every year, ESPN keeps updated statistics on picks for all created brackets.
 
 ![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/wpw.png)
 
@@ -115,9 +113,9 @@ $$\max_{\boldsymbol{B}} \quad P(score(\boldsymbol{B},\boldsymbol{O}) > score(\bo
 
 Using the law of large numbers we can estimate this probability with a large number of events: 
 
-$$\max_{\boldsymbol{B}} \quad \frac{1}{BIG}\sum_{t=0}^{BIG}\mathbb{I}(score(\boldsymbol{B},\boldsymbol{O_t}) > score(\boldsymbol{C_{it}},\boldsymbol{O_t}) \quad \forall i \in 1...n\_competitors)$$
+$$\max_{\boldsymbol{B}} \quad \frac{1}{BIG}\sum_{t=0}^{BIG}I(score(\boldsymbol{B},\boldsymbol{O_t}) > score(\boldsymbol{C_{it}},\boldsymbol{O_t}) \quad \forall i \in 1...n\_competitors)$$
 
-where $$\mathbb{I}$$ is the indicator function
+where $$I$$ is the indicator function
 
 Ok so are we ready to go? We can read up on some classic optimization methods and chug away... not quite. In fact, once we include the constraints that our bracket $$\boldsymbol{B}$$ is a valid bracket (doesn't pick every team to win every game for instance), the optimization problem is very messy and highly non-convex.. ugh.
 
@@ -191,13 +189,49 @@ There are two things we are missing in our model of our problem so far:
 
 Fortunately, our structure lends itself to accounting for these elements easily. We will stick with the 4 team tourney for ease of demonstration.
 
+### Accounting for victory in pool
+
 To check for a victory in our pool, we want to see if our score, $$z_{output}$$, is greater than the maximum of our competitor's scores. In the case the we have 3 competing brackets, for instance, we sample 3 competing brackets $$C$$ as discussed in part 1, score them based on the actual tourney result, take the maximum of the 3, and then can compare it with $$z_{output}$$ to see who wins. We can execute this comparison with a sigmoid.
 
 ![alt text](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/full_net.png)
 
-Now, we have discussed how our structure models our score for one tourney realization, but we must account for the fact that when creating a bracket, we of course don't know how the tournament will turn out.
 
-As established in part 1, we have a ground truth from which we can sample tournament outcomes. We can use this to sample a dataset of simulated outcomes, where each observation ()
+### Accounting for uncertainty
+
+Now, we have discussed how our structure models our score for one tourney realization, but we must account for the fact that when creating a bracket, we, of course, don't know how the tournament will turn out.
+
+As established in part 1, we have a ground truth from which we can sample tournament outcomes. We can use this to sample a dataset of simulated outcomes. For simplicity, with 3 simulations we have
+
+![](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/tensor.png) 
+
+For each simulation, we sample a *new* set of competing brackets from $$p(\boldsymbol{Q_{pop}})$$ and score them with their corresponding simulated outcome. We then can take the maximum score between competitors for each simulation, $$z_{pool}^t$$. 
+
+We also can easily transform our simulated outcomes into the desired format for of the number of wins per team. 
+
+This leaves us with input matrix $$\boldsymbol I$$, (n_simulations x n_teams) and vector $$\boldsymbol{Z_{pool}}$$, (n_simulations x 1)
+
+
+$$\boldsymbol I=
+\begin{pmatrix} 
+3 & 2 & \dots &  5 \\
+6 & 3 & \dots &  4  \\
+
+ 4 & 6 & \dots &  4  
+ \end{pmatrix}
+\qquad 
+\boldsymbol{Z_{pool}}=
+\begin{pmatrix} 
+164  \\
+159  \\
+136
+ \end{pmatrix}$$
+
+Essentially, we have created a dataset for our network where the number of observations is the number of simulations. If we increase the number of simulations to a high number** we can account for uncertainty in both the tournament outcome and competitors' brackets.
+
+It is important to remember that while we are re-sampling opponents brackets at each simulation, we are limiting our algorithm to a single bracket choice (optimized weights) across simulations. This is critical since we do not get a choose a bracket after we have seen the results!
+
+***In practice ~2000 simulations accounts for the randomness of the process*
+
 ## Implementing with PyTorch
 
 An advantage of our neural framework is that we can extend popular software frameworks to implement our model. We will use PyTorch here (learn more: <https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html)>.
@@ -205,6 +239,7 @@ An advantage of our neural framework is that we can extend popular software fram
 For now, we will not touch on the general logistics of implementing PyTorch models and will focus on the unique aspects of our model.
 
 Before we get to defining the entire network, we can create a function to generalize the repetitive nature of our our layers.
+
 
 ```python
 class Knockout_Round_Layer(torch.autograd.Function):
@@ -297,5 +332,9 @@ class MadnessNet(torch.nn.Module):
 
         return score
 ```
+
+# Part 3: Results and Insights
+
+
 
 
