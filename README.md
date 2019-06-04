@@ -21,7 +21,7 @@ Many people have tackled the problem of predicting the outcomes of March Madness
 
 March Madness is arguably the most exiting three weeks in sports TV. 64 college basketball teams play in a win or go home tournament for the National championship (we will not consider the First Four Entry round here). Unless you're a diehard fan of a single team, at least 90% of the fun comes from creating your predicted bracket and ___(without a chance of succes)ly hoping it turns out perfect. 
 
-Many people enter their bracket in a pool with their friends or coworkers. I can't help you get the perfect bracket, not even close, but I can help you win that pool.
+Many people enter their bracket in a pool with their friends or coworkers. This post will not get you that perfect bracket, but will help you chances at winning that pool. 
 
 ## Predicted Outcomes
 
@@ -208,7 +208,7 @@ For each simulation, we sample a *new* set of competing brackets from $$p(\bolds
 
 We also can easily transform our simulated outcomes into the desired format for of the number of wins per team. 
 
-This leaves us with input matrix $$\boldsymbol I$$, (n_simulations x n_teams) and vector $$\boldsymbol{Z_{pool}}$$, (n_simulations x 1)
+This leaves us with input matrix $$\boldsymbol I$$, (n_simulations x n_teams) and vector $$\vec{z}_{pool}$$, (n_simulations x 1)
 
 
 $$\boldsymbol I=
@@ -219,7 +219,7 @@ $$\boldsymbol I=
  4 & 6 & \dots &  4  
  \end{pmatrix}
 \qquad 
-\boldsymbol{Z_{pool}}=
+\vec{z}_{pool}=
 \begin{pmatrix} 
 164  \\
 159  \\
@@ -333,8 +333,10 @@ class MadnessNet(torch.nn.Module):
         return score
 ```
 
+## Optimization
+
+TODO
+
 # Part 3: Results and Insights
 
-
-
-
+TODO
