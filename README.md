@@ -335,8 +335,12 @@ class MadnessNet(torch.nn.Module):
 
 ## Optimization
 
-TODO
+Our PyTorch implementation, t
 
 # Part 3: Results and Insights
 
 TODO
+
+![](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/wpw_res.png) 
+
+![](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/538_res.png) 
