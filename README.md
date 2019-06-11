@@ -2,6 +2,8 @@
 
 # Optimizing March Madness brackets with Bracket Networks and SGD 
 
+*(a work in progress)*
+
 Many people have tackled the problem of predicting the outcomes of March Madness games, or even win probabilities, but even with accurate win probabilities how can we build optimal brackets? The answer is not as obvious as it may seem. 
 
 ### The goal of this post is twofold:
@@ -19,7 +21,7 @@ Many people have tackled the problem of predicting the outcomes of March Madness
 
 # Part 1: The Problem
 
-March Madness is arguably the most exiting three weeks in sports TV. 64 college basketball teams play in a win or go home tournament for the National championship (we will not consider the First Four Entry round here). Unless you're a diehard fan of a single team, at least 90% of the fun comes from creating your predicted bracket and ___(without a chance of succes)ly hoping it turns out perfect. 
+March Madness is arguably the most exiting three weeks in sports TV. 64 college basketball teams play in a win or go home tournament for the National championship (we will not consider the First Four Entry round here). Unless you're a diehard fan of a single team, at least 90% of the fun comes from creating your predicted bracket and vainly hoping it turns out perfect. 
 
 Many people enter their bracket in a pool with their friends or coworkers. This post will not get you that perfect bracket, but will help you chances at winning that pool. 
 
@@ -335,12 +337,22 @@ class MadnessNet(torch.nn.Module):
 
 ## Optimization
 
-Our PyTorch implementation, t
+Our PyTorch implementation makes applying Stochastic Gradient Descent seamless. 
+
+**TODO**: explain SGD implementation and randomization procedure
+
+
 
 # Part 3: Results and Insights
 
-TODO
+**TODO**: dissect results
+
+| # Competitors                         | 1     | 15     | 50     | 100    | 500     |
+|---------------------------------------|-------|--------|--------|--------|---------|
+| Unoptimized Expected P(win)           | 0.5   | 0.0625 | 0.0196 | 0.0099 | 0.002   |
+| Optimized P(win) vs Who Picked Whom   | 0.731 | 0.174  | 0.088  | 0.047  | 0.018   |
+| Expected Return vs. Who Picked Whom   | 146%  | 278%   | 448%   | 475%   | 901%    |
+
 
 ![](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/wpw_res.png) 
 
-![](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/538_res.png) 
