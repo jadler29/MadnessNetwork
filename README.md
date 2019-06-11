@@ -76,7 +76,7 @@ Imagine you are at a carnival and come across a booth where you task is to guess
 
 ![](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/empty.png)
 
-So what do you guess? If your like me and just want to maximize your chance at the $200, then 100 of course! But now imagine the rules are different: instead of having to guess number of beans exactly, you just have to be closer than everyone else. Your friend tells you to come by at the very end of the carnival, and not only gives you the bean distribution as before, but he also gives you a list of the other guesses people have made (gray lines).
+So what do you guess? 100 of course! But now imagine the rules are different: instead of having to guess number of beans exactly, you just have to be closer than everyone else. Your friend tells you to come by at the very end of the carnival, and not only gives you the bean distribution as before, but he also gives you a list of the other guesses people have made (gray lines).
 
 ![](https://raw.githubusercontent.com/jadler29/MadnessNetwork/master/old/with_guess.png)
 
